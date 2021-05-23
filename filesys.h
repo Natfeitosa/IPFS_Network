@@ -60,6 +60,11 @@ class FileSys{
             FATEntry e(fileName,p_link[0],start,size);
             // }
             writeFAT(e.toString(PTR_LEN_L_)+TABLE_END_);
+            vector<string> ports=getPorts();
+            Request r;
+            for(int i=1;i<ports.size();i++){
+                r.updateFAT(ports[i],e.toString(PTR_LEN_L_)+TABLE_END_);
+            }
             return;
         }
         string getBlockAddr(int block) {
@@ -158,6 +163,10 @@ class FileSys{
             }
             fs.close();
             return outp;
+        }
+        void updateFAT(string entry){
+            writeFAT(entry);
+            return;
         }
     private:
         const string SYSTEM_FILE_NAME_;
