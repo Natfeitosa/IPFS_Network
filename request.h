@@ -20,7 +20,7 @@ public:
   std::string Request_block_content(std::string port_num,int block);
   std::string write_block(std::string port_num,std::string content);
   void set_next_addr(std::string port, int prevBlock,std::string new_addr);
-
+  void updateFAT(std::string port_num, std::string entry);
 private:
   void Create_socket(std::string port);
   void Connect_client(std::string port);
@@ -182,4 +182,13 @@ void Request::set_next_addr(std::string port, int prevBlock, std::string new_add
     iResult = send(client, new_addr.c_str(), new_addr.size(), 0);
 
 }
+void Request::updateFAT(std::string port_num, std::string entry) {
+    Connect_client(port_num);
+    const char* commad = "updateFAT";
+    iResult = send(client, commad, (int)strlen(commad), 0);
+    Header server1;
+    iResult = recv(client, (char*)&server1, sizeof(server1), 0);
+    iResult = send(client, entry.c_str(), entry.size(), 0);
+}
+
 #endif

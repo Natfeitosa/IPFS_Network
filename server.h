@@ -284,6 +284,10 @@ void Server::Listen()
                      client_socket = peer;
                      return "block_ptr";
                  }
+                 else if (!strcmp(buff, "updateFAT")) {
+                     client_socket = peer;
+                     return "updateFAT";
+                 }
              }
 
          }
@@ -385,7 +389,7 @@ void Server::Server_init(){
 void Server::Start_server(){
     Server_init();
     
-    std::vector<string> ports = {"8080","8081"};
+    std::vector<string> ports = {"8080","8081","8082", "8083" };
     for (string i : ports) {
         if (i != port_) {
             fs.addPort(i);
@@ -438,7 +442,10 @@ void Server::Start_server(){
           Send_block_content(block_ptr_);
       }
 
-      else{}
+      else if (cmd== "updateFAT"){
+          std::string entry = Get_new_addr();
+          fs.updateFAT(entry);
+      }
   }
 
   return;
