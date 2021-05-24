@@ -36,7 +36,7 @@ private:
    Header serverh;
    clienth.syn = 1;
    bool confirm = false;
-   printf("Starting Handshake\n");
+   //printf("Starting Handshake\n");
    iResult = send(client, (char*)&clienth, sizeof(clienth), 0);
    iResult = recv(client, (char*)&serverh, sizeof(serverh), 0);
    if (serverh.ack == 1 && serverh.syn==1)
@@ -44,7 +44,7 @@ private:
        clienth.ack = 1;
        clienth.syn = 0;
        iResult = send(client, (char*)&clienth, sizeof(clienth), 0);
-       printf("It worked!\n");
+       //printf("It worked!\n");
        return true;
       }
    else {

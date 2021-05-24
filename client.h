@@ -28,7 +28,6 @@ class Sender
   public:
     Sender(std::string port);
     void Connect_client();
-    bool Send_data(const char* message);
     std::string Read(std::string &filename);
     void WriteFile(std::string filename,std::string content);
     std::string list();
@@ -49,7 +48,7 @@ class Sender
      Header serverh;
      clienth.syn = 1;
      bool confirm = false;
-     printf("Starting Handshake\n");
+     //printf("Starting Handshake\n");
      iResult = send(client, (char*)&clienth, sizeof(clienth), 0);
      iResult = recv(client, (char*)&serverh, sizeof(serverh), 0);
      if (serverh.ack == 1 && serverh.syn==1)
@@ -57,7 +56,7 @@ class Sender
          clienth.ack = 1;
          clienth.syn = 0;
          iResult = send(client, (char*)&clienth, sizeof(clienth), 0);
-         printf("It worked!\n");
+         //printf("It worked!\n");
          return true;
         }
      else {
@@ -79,41 +78,7 @@ Sender::Sender(std::string port) : port1{port}
 
   }
 }
-bool Sender::Send_data(const char* message)
-{
 
-  iResult = send(client, message, (int)strlen(message), 0);
-  if (iResult == SOCKET_ERROR)
-  {
-    printf("Had problem sending message %d\n", WSAGetLastError());
-    closesocket(client);
-    WSACleanup();
-    return false;
-  }
-  iResult = shutdown(client, SD_SEND);
-  if (iResult == SOCKET_ERROR) {
-    printf("Had problem shutting down send service: %d\n", WSAGetLastError());
-    closesocket(client);
-    WSACleanup();
-    return EXIT_FAILURE;
-  }
-  do {
-      iResult = recv(client, buffer, buffer_size, 0);
-      if (iResult > 0) {
-        printf("Bytes revieced: %d\n", iResult);
-      }
-      else if(iResult==0){
-        printf("Connection finished\n");
-      }
-      else{
-        printf("recv failed: %d\n", WSAGetLastError());
-      }
-
-  } while (iResult > 0);
-  printf("sever said: %s\n", buffer);
-  closesocket(client);
-  return true;
-  }
 
 void Sender::Connect_client()
 {
@@ -191,13 +156,13 @@ std::string Sender::Read(std::string &filename)
       }
       if(serverheader.ack == 1)
       {
-        printf("ACK for Filename recv\n");
+        //printf("ACK for Filename recv\n");
       /* This is where the client waits for the server to send the file.*/
 
-        printf("Recving file\n");
+        //printf("Recving file\n");
 
         iResult= recv(client,buffer,buffer_size,0);//Might have to loop multiple times depending on the size of the file
-        printf("This is the buffer: %s\n",buffer);
+       // printf("This is the buffer: %s\n",buffer);
         clientheader.ack=1;
         iResult= send(client,(char*)&clientheader,sizeof(clientheader),0);
         std::string file(buffer);
@@ -217,23 +182,23 @@ void Sender::WriteFile(std::string filename,std::string content)
 {
   Header serverh;
   Header clienth;
-  printf("Sending operation\n");
+  //printf("Sending operation\n");
   const char* write= "write";
   iResult=send(client,write,(int)strlen(write),0);
-  printf("waiting for ack\n");
+  //printf("waiting for ack\n");
   iResult=recv(client,(char*)&clienth,sizeof(clienth),0);
   if(clienth.ack==1)
   { clienth.ack=0;
-    printf("sending file name\n");
+    //printf("sending file name\n");
     iResult=send(client,filename.c_str(),filename.size(),0);
-    printf("waiting for ack\n");
+    //printf("waiting for ack\n");
     iResult=recv(client,(char*)&clienth,sizeof(clienth),0);
     if(clienth.ack==1)
     {
       clienth.ack=0;
-      printf("sending content\n");
+      //printf("sending content\n");
       iResult=send(client,content.c_str(),content.size(),0);
-      printf("waiting for ack\n");
+      //printf("waiting for ack\n");
       iResult=recv(client,(char*)&clienth,sizeof(clienth),0);
       if(clienth.ack==1)
       {
@@ -258,13 +223,13 @@ std::string Sender::list() {
         serverheader.ack = 0;
 
 
-        printf("ACK for Filename recv\n");
+        //printf("ACK for Filename recv\n");
         /* This is where the client waits for the server to send the file.*/
 
-        printf("Recving file\n");
+        //printf("Recving file\n");
 
         iResult = recv(client, buff, buffer_size, 0);//Might have to loop multiple times depending on the size of the file
-        printf("This is the buffer: %s\n", buff);
+        //printf("This is the buffer: %s\n", buff);
         clientheader.ack = 1;
         iResult = send(client, (char*)&clientheader, sizeof(clientheader), 0);
         std::string file(buff);
@@ -281,25 +246,27 @@ void Sender::Client_start(){
 	std::string filename = "systemfile";
 	std::string content = Read(filename);
 	std::cout << content << std::endl;*/
-	std::cout << "entering wait stage...\n";
+	//std::cout << "entering wait stage...\n";
 	while (1) {
-		std::cout << "What other operation you would like to do?\n";
+		std::cout << "What Operation you would like to do?\n";
 		std::string command;
     std::string filename;
     //std::string content;
 		std::getline(std::cin,command);
-		if (command == "read") {
+		if (command == "read") 
+        {
 			std::cout << "what is the name of the file?\n";
 			std::getline(std::cin,filename);
 			std::string content = Read(filename);
-      std::cout<<content<<std::endl;
+            std::cout<<content<<std::endl;
 		}
-		else if (command == "write") {
+		else if (command == "write") 
+        {
 			std::cout << "what is the name of the file?\n";
 			std::getline(std::cin,filename);
 			std::cout << "What is the content of the file?\n";
-      std::string content;
-      std::getline(std::cin,content);
+            std::string content;
+            std::getline(std::cin,content);
 
 			WriteFile(filename, content);
 		}
@@ -308,7 +275,7 @@ void Sender::Client_start(){
 			std::cout << "List of available files:\t" << list_ << std::endl;
 		}
     else{
-      std::cout<<"Unknown Command\n";
+      std::cout<<"Available Commands:\n-list\n-write\n-read\n";
     }
 	}
 

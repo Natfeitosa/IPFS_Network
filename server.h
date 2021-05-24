@@ -27,16 +27,16 @@ class Server
 {
 public:
   Server(std::string port);
-  char *Receive_Msg();    //Function to practice sending messages
+  //char *Receive_Msg();    //Function to practice sending messages
   std::string Stand_by(); //To find what type of operation the client_socket wants the server to peform
   //std::string Read_file();// Recieves the name of the file the client_socket wants
   void Send_file(std::string &file); // Sends the file the client_socket wants
   std::string Get_filename(); //Gets the name of the File it is meant to create
   std::string Get_Content(); //Gets the Content of the file
-  void Close_connection();
-  bool Get_handshake();
-  void Server_init();
-  void Start_server();
+  void Close_connection();//Close the connection of an inactive socket
+  bool Get_handshake();//Return the variable handshake_
+  void Server_init();//Starts the server socket and binds it
+  void Start_server();//Runs the server
 private:
   FileSys fs;
   std::string port_;
@@ -51,20 +51,20 @@ private:
   int buffer_size=BUFFER_SIZE;
   struct addrinfo *result=NULL,*ptr=NULL,hints;
 
-  void Clear_buffer();
+  void Clear_buffer();    //cleans the buffer
   void Bind();            //Binds the server to a PORT
   void Listen();          //Listens for incoming sockets
   void Create_Server();   //Creates the server socket
-  void Remove_socket(SOCKET peer);
-  std::string Get_write_block();
-  void Send_addr(std::string addr);
-  int Get_previous_block();
-  string Get_new_addr();
-  int Get_block_number();
-  void Send_block_content(string block_content);
+  void Remove_socket(SOCKET peer);//Removes a client socket from the list of connected sockets
+  std::string Get_write_block();//Gets the write block for the filesystem
+  void Send_addr(std::string addr); // Sends and address to the other nodes in the system
+  int Get_previous_block();     //Gets the int location of previous block
+  string Get_new_addr();        //returns the new addr of the block file from the nodes
+  int Get_block_number();       //Returns block number given by the connection node
+  void Send_block_content(string block_content);    //Sends the content of the block to the appropriate node
   void Handshake()
   {
-    printf("staring Handshake...\n");
+   // printf("staring Handshake...\n");
     Header clienth;
     Header serverh;
     iResult = recv(client_socket, (char*)&clienth, sizeof(clienth), 0);
@@ -76,7 +76,7 @@ private:
         iResult = recv(client_socket, (char*)&clienth, sizeof(clienth), 0);
         if (clienth.ack == 1)
         {
-          printf("it worked!\n");
+          //printf("it worked!\n");
           handshake_=true;
         }
         else {
@@ -107,7 +107,7 @@ Server::Server(std::string port): port_{port},fs("FileSystem.txt", 8, 500, port)
 }
 void Server::Create_Server()
 {
-    printf("Creating Server\n");
+  printf("Creating Server...\n");
   ZeroMemory(&hints, sizeof(hints));
   hints.ai_family = AF_INET;
   hints.ai_socktype = SOCK_STREAM;
@@ -126,7 +126,7 @@ void Server::Create_Server()
   if(server_socket==INVALID_SOCKET){
     printf("failed to create socket\n");
   }
-  printf("Created Server\n");
+  printf("Server Created!\n");
 }
 void Server::Bind()
 {
@@ -140,7 +140,7 @@ void Server::Bind()
       return;
 
   }
-  printf("Binded Server\n");
+  printf("Binded Server!\n");
   //freeaddrinfo(result);
 }
 void Server::Listen()
@@ -155,32 +155,7 @@ void Server::Listen()
     }
 
 }
- char* Server::Receive_Msg()
-{
-    int Sendresults;
-
-      iResult = recv(client_socket, buffer, buffer_size, 0);
-      if (iResult > 0) {
-          Sendresults = send(client_socket, buffer, buffer_size, 0);
-          if (Sendresults == SOCKET_ERROR) {
-              printf("Error sending things to client_socket: %d\n", WSAGetLastError());
-              closesocket(client_socket);
-              WSACleanup();
-              //return EXIT_FAILURE;
-          }
-      }
-      else if (iResult == 0)
-          printf("Connection over\n");
-      else {
-          printf("Failed to recieve message from client_socket: %d\n", WSAGetLastError());
-          closesocket(client_socket);
-          WSACleanup();
-          return buffer;
-      }
-
-  printf("Message from server is: %s\n", buffer);
-  return buffer;
-}
+ 
 
  std::string Server::Stand_by()
  { // This is meant to recieve commands from the client_socket about operations
@@ -242,8 +217,8 @@ void Server::Listen()
                      closesocket(peer);
                      break;
                  }
-                 std::cout << "Recieved command from\t" << peer << std::endl;
-                 printf("Message is: %s\n", buff);
+                 //std::cout << "Recieved command from\t" << peer << std::endl;
+                 //printf("Message is: %s\n", buff);
                  /*if(iResult==SOCKET_ERROR){
                    printf("Error sending things to client_socket: %d\n", WSAGetLastError());
                  }*/
@@ -307,27 +282,7 @@ void Server::Listen()
  }
 
 
-/*
-std::string Server::Read_file() //This is meant to be used to recieve the name of the file the client_socket wants.
-{
-  Header serverh;
-  Clear_buffer();
-  //wait for files name
-  iResult=recv(client_socket,buffer,buffer_size,0);//Name of the file client wants to read
-  if(iResult==0)
-  {
-    printf("failed to recieve filesname\n");
-    std::string empty="";
-    Clear_buffer();
-    return empty;
-  }
-  serverh.ack=1;
-  iResult=send(client_socket,(char*)&serverh,sizeof(serverh),0);//Sends the client ack that recieved the name of the file
-  std::string filename(buffer);
-  Clear_buffer();
-  return filename;
 
-}*/
 void Server::Clear_buffer(){
   for(int i=0;i<buffer_size;i++){
     buffer[i]=0;
@@ -401,7 +356,7 @@ void Server::Start_server(){
       string cmd = Stand_by();
       if (cmd == "read") {
           string fname = Get_filename();
-          cout << "Looking for content\n";
+          //cout << "Looking for content\n";
           string content_ = fs.readFile(fname);
           Send_file(content_);
       }
@@ -421,7 +376,6 @@ void Server::Start_server(){
       else if(cmd=="write_block"){
           string file_content=Get_write_block();
           string addr=fs.writeBlock_p(file_content);
-          std::cout << "This is the server, this is the addr: " << addr << std::endl;
           Send_block_content(addr);
           }
       else if (cmd == "set_next_addr") {
