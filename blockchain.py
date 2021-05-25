@@ -6,6 +6,13 @@ from uuid import uuid4
 import requests
 from flask import Flask, jsonify, request
 
+'''
+Create the edits for the file, where user will enter the edit at any node, before the edit is send to the node containing the file data, 
+a temporary fat log will be kept, every other node will get the fat log (each fat will be in the following format [‘file_name, ‘node_port’, ‘node_address’] 
+and at the node address [‘data’, ‘next_node_port’, ‘next_node_port_address’]) will be and make sure the fat log links are correctly linked, 
+once at least 51% agrees on this a block will be created with the fat log of the whole file and append into the blockchain. 
+After that the edit will be sent to the node with the data and update the data.
+'''
 
 class Blockchain:
     def __init__(self):
