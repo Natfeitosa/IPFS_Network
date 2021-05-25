@@ -24,7 +24,7 @@ class Blockchain:
         self.chain = []
         self.nodes = set()
         self.new_block(previous_hash='0')
-        # testing
+        # testing must include if not connected
         '''
         self.create_nodes(address='http://127.0.0.1:5000')
         self.create_nodes(address='http://127.0.0.1:5001')
@@ -228,7 +228,7 @@ class Blockchain:
 app = Flask(__name__)
 node_identifier = str(uuid4()).replace('-', '')
 blockchain = Blockchain()
-# testing 
+# testing must include if not connected
 '''
 @app.route('/start', methods=['POST'])
 def start():
