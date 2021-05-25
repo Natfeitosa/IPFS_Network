@@ -24,6 +24,38 @@ class Blockchain:
         self.chain = []
         self.nodes = set()
         self.new_block(previous_hash='0')
+        # testing
+        '''
+                self.create_nodes(address='http://127.0.0.1:5000')
+        self.create_nodes(address='http://127.0.0.1:5001')
+        self.create_nodes(address='http://127.0.0.1:5002')
+        self.create_nodes(address='http://127.0.0.1:5003')
+
+    def pre_add(self):
+        requests.post('http://127.0.0.1:5000/pre/add', json={
+            'file_one': 'file1', 'port_one': '5000', 'address_one': 0, 'file_two': 'file2', 'port_two': '5000',
+            'address_two': 1, 'data_one': 'F1', 'next_port_one': '5001', 'next_address_one': 0, 'data_two': 'G1',
+            'next_port_two': '5001', 'next_address_two': 1})
+        requests.post('http://127.0.0.1:5001/pre/add', json={
+            'file_one': 'file1', 'port_one': '5001', 'address_one': 0, 'file_two': 'file2', 'port_two': '5001',
+            'address_two': 1, 'data_one': 'F2', 'next_port_one': '5002', 'next_address_one': 0, 'data_two': 'G2',
+            'next_port_two': '5002', 'next_address_two': 1})
+        requests.post('http://127.0.0.1:5002/pre/add', json={
+            'file_one': 'file1', 'port_one': '5002', 'address_one': 0, 'file_two': 'file2', 'port_two': '5002',
+            'address_two': 1, 'data_one': 'F3', 'next_port_one': '5003', 'next_address_one': 0, 'data_two': 'G3',
+            'next_port_two': '5003', 'next_address_two': 1})
+        requests.post('http://127.0.0.1:5003/pre/add', json={
+            'file_one': 'file1', 'port_one': '5003', 'address_one': 0, 'file_two': 'file2', 'port_two': '5003',
+            'address_two': 1, 'data_one': 'F4', 'next_port_one': '-1', 'next_address_one': -1, 'data_two': 'G4',
+            'next_port_two': '-1', 'next_address_two': -1})
+
+    def pre_add_info(self, file_one, port_one, address_one, file_two, port_two, address_two,
+                     data_one, next_port_one, next_address_one, data_two, next_port_two, next_address_two):
+        self.node_info.append([file_one, port_one, address_one])
+        self.node_info.append([file_two, port_two, address_two])
+        self.data_info.append([data_one, next_port_one, next_address_one])
+        self.data_info.append([data_two, next_port_two, next_address_two])
+    '''
 
     def edit(self, file_name, previous_data, new_data, current_port):
         network = self.nodes
@@ -196,6 +228,27 @@ class Blockchain:
 app = Flask(__name__)
 node_identifier = str(uuid4()).replace('-', '')
 blockchain = Blockchain()
+# testing 
+'''
+@app.route('/start', methods=['POST'])
+def start():
+    blockchain.pre_add()
+    return jsonify()
+
+
+@app.route('/pre/add', methods=['POST'])
+def pre_add():
+    values = request.get_json()
+    required = ['file_one', 'port_one', 'address_one', 'file_two', 'port_two', 'address_two',
+                'data_one', 'next_port_one', 'next_address_one', 'data_two', 'next_port_two', 'next_address_two']
+    if not all(keys in values for keys in required):
+        return 'Error', 400
+    blockchain.pre_add_info(values['file_one'], values['port_one'], values['address_one'], values['file_two'],
+                            values['port_two'], values['address_two'],
+                            values['data_one'], values['next_port_one'], values['next_address_one'], values['data_two'],
+                            values['next_port_two'], values['next_address_two'])
+    return jsonify()
+ '''
 
 
 @app.route('/new/transaction', methods=['POST'])
